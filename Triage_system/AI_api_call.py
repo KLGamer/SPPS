@@ -1,6 +1,7 @@
 from google import genai
 import os
 import json
+from math import e
 from typing import Any
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") 
 
@@ -34,16 +35,16 @@ def calculate_risk_score(user_info: dict[str, Any] ):
     response = ask_gemini(prompt)
     response = response.text # pyright: ignore[reportCallIssue, reportOptionalCall]
 
-
     print(response)
     response_dict = jsonify(str(response))
     print(response_dict)
     print(response_dict["Risk Score"])
 
-def calculate_token_reduction(number_of_patients:int, current_token_number:int, risk_score:float):
-    risk_score = max(risk_score-0.5, 0)
-    token_reduction = (current_token_number-1) * risk_score * (current_token_number / number_of_patients)
-    return token_reduction
+def calculate_token_reduction(current_token_number:int, risk_score:float) -> int:
+    token_reduction = 1+(current_token_number-1) * (1-risk_score)
+    reduction = current_token_number - token_reduction
+    new_reduction = int(reduction // 1) 
+    if 0 < reduction < 3 and risk_score < 0.5:
+        return 0
+    return new_reduction
 
-
-    
