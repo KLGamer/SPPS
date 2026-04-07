@@ -6,7 +6,9 @@ connection = connector.connect(
     database = "sql12822441",
 )
 cursor = connection.cursor()
-connection.commit()
+cursor.execute("select * from List;")
+for x in cursor:
+    print(x)
 
 
 def shift_tokens_from(cursor, token: int):
@@ -40,6 +42,21 @@ def insert_patient(cursor, id: int, pname: str, age: int, blood_group: str, sex:
         (id, pname, age, blood_group, sex, temperature, mNumber, pregnancy, pwd, symptom, new_token)
     )
     connection.commit()
+
+
+def get_all_patients_with_estimated_time():
+    cursor.execute(
+        "SELECT id, pname, age, blood_group, sex, temperature, mNumber, pregnancy, pwd, symptom, token FROM List ORDER BY token"
+    )
+    columns = [col[0] for col in cursor.description]
+    patients = {}
+
+    for row in cursor.fetchall():
+        record = dict(zip(columns, row))
+        record["estimated_time_minutes"] = record["token"] * 5
+        patients[record["token"]] = record
+
+    return patients
 
 
 def current_number_of_people(cursor):
